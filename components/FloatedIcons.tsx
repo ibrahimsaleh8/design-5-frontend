@@ -49,7 +49,7 @@ export default function FloatedIcons({
   telephone,
   socialMedia,
 }: Props) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const whatsappNumber = whatsapp.includes("+")
@@ -149,19 +149,6 @@ export default function FloatedIcons({
 
   return (
     <>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-20 bg-black/10 backdrop-blur-[2px]"
-            aria-hidden="true"
-          />
-        )}
-      </AnimatePresence>
-
       <div
         ref={containerRef}
         className="fixed z-30 end-4 bottom-4 sm:end-6 sm:bottom-6 flex flex-col items-end gap-3"
