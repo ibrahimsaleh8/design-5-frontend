@@ -1,0 +1,211 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* =============================================
+   Design System — مسار Arabic Editorial RTL UI
+   ============================================= */
+:root {
+  /* ── Brand ── */
+  --primary: #f58220;
+  --primary-hover: #e07518;
+  --primary-light: #fff4eb;
+  --secondary: #2b58c3;
+  --secondary-light: #eef3fc;
+
+  /* ── Backgrounds ── */
+  --bg-page: #ffffff;
+  --bg-section: #f7f7f7;
+  --bg-card: #ffffff;
+  --bg-tag: #e8f6f3;
+  --bg-tag-warm: #fff4eb;
+
+  /* ── Typography ── */
+  --text-primary: #1a1a1a;
+  --text-heading: #1a1a1a;
+  --text-body: #4a4a4a;
+  --text-muted: #8e8e8e;
+  --text-white: #ffffff;
+
+  /* ── Borders & Dividers ── */
+  --border-light: #ececec;
+  --border-medium: #d4d4d4;
+
+  /* ── Shadows ── */
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 32px rgba(245, 130, 32, 0.12);
+  --shadow-header: 0 1px 0 rgba(0, 0, 0, 0.06);
+
+  /* ── Layout ── */
+  --container-max: 1200px;
+  --container-padding: 1.25rem;
+  --section-gap: 2rem;
+
+  /* ── Radius ── */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-full: 9999px;
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: inherit;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+.site-container {
+  max-width: var(--container-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--container-padding);
+  width: 100%;
+}
+
+/* Orange accent underline */
+.accent-underline {
+  position: relative;
+}
+
+.accent-underline::after {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 4px;
+  background-color: var(--primary);
+  border-radius: var(--radius-full);
+  margin-top: 1rem;
+}
+
+/* Card hover lift */
+.card-hover {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Image zoom on hover */
+.img-zoom-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.img-zoom-container img {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.img-zoom-container:hover img {
+  transform: scale(1.05);
+}
+
+/* Article content typography */
+.article-content {
+  color: var(--text-body);
+  font-size: 1.125rem;
+  line-height: 1.95;
+}
+
+.article-content p {
+  margin-bottom: 1.5rem;
+}
+
+.article-content h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-top: 2.25rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.article-content h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  margin-top: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.article-content blockquote {
+  border-inline-start: 4px solid var(--primary);
+  background-color: var(--primary-light);
+  padding: 1.25rem 1.5rem;
+  margin: 1.75rem 0;
+  border-radius: var(--radius-md);
+  font-style: italic;
+  color: var(--text-primary);
+}
+
+.article-content img {
+  border-radius: var(--radius-lg);
+  margin: 2rem 0;
+  width: 100%;
+  height: auto;
+  box-shadow: var(--shadow-card);
+}
+
+.article-content a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.article-content ul,
+.article-content ol {
+  margin-bottom: 1.5rem;
+  padding-inline-start: 1.5rem;
+}
+
+.article-content li {
+  margin-bottom: 0.5rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-section);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s ease-out;
+}
