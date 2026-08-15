@@ -10,7 +10,7 @@ async function getHomeData() {
   try {
     const [settingsRes, homepageRes, latestRes, categoriesRes] =
       await Promise.all([
-        fetch(`${APP_URL}/api/settings`, { cache: "no-store" }),
+        fetch(`${APP_URL}/api/settings`, { cache: "force-cache" }),
         fetch(`${APP_URL}/api/articles/homepage?limit=6`, {
           cache: "force-cache",
         }),

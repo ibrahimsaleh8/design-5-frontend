@@ -15,7 +15,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const res = await fetch(`${APP_URL}/api/sitemap`);
+    const res = await fetch(`${APP_URL}/api/sitemap`, {
+      next: {
+        tags: ["sitemap"],
+      },
+    });
 
     if (!res.ok) {
       return staticRoutes;
