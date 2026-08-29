@@ -175,6 +175,85 @@ body {
 .article-content li {
   margin-bottom: 0.5rem;
 }
+-content img,
+.article-content img {
+  @apply max-w-full h-auto rounded-xl my-4 shadow-sm mx-auto block border border-gray-200;
+}
+
+.editor-content ul,
+.article-content ul {
+  @apply list-disc list-inside my-3 pr-4 space-y-1 text-base;
+}
+
+.editor-content ol,
+.article-content ol {
+  @apply list-decimal list-inside my-3 pr-4 space-y-1 text-base;
+}
+
+.editor-content li p,
+.article-content li p {
+  @apply inline my-0;
+}
+
+.editor-content table,
+.article-content table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: hidden;
+  table-layout: auto;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.editor-content td,
+.editor-content th,
+.article-content td,
+.article-content th {
+  border: 1px solid #e5e7eb;
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 10px 14px;
+  position: relative;
+  vertical-align: top;
+}
+
+.editor-content th,
+.article-content th {
+  background-color: #f8f6f1;
+  color: #332822;
+  font-weight: 700;
+  text-align: inherit;
+}
+
+.editor-content tr,
+.article-content {
+  @apply bg-white text-black;
+}
+
+.editor-content .selectedCell:after,
+.article-content .selectedCell:after {
+  background: rgba(107, 78, 47, 0.12);
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.editor-content .column-resize-handle,
+.article-content .column-resize-handle {
+  background-color: #6b4e2f;
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+}
 
 /* Scrollbar */
 ::-webkit-scrollbar {

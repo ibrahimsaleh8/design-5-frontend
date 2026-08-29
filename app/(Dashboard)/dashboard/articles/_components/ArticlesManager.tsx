@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { APP_URL } from "@/lib/ProjectId";
-import { Input } from "@/components/ui/input";
 import ArticleEditor from "./ArticleEditor";
 import { Category } from "@/lib/types";
 import KeywordTagManager from "@/app/(Dashboard)/_components/KeywordTagManager";
+import { Input } from "@/components/ui/input";
+import ImageUploader from "@/components/ImageUploader";
 
 // Dashboard-specific article type with new API fields
 export type DashboardArticle = {
@@ -44,9 +45,6 @@ export default function ArticlesManager({
   const [categoryId, setCategoryId] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
 
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState("");
-
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -61,37 +59,6 @@ export default function ArticlesManager({
     setCoverImageId(null);
     setCategoryId("");
     setKeywords([]);
-    setFile(null);
-    setPreview("");
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setFile(selectedFile);
-      setPreview(URL.createObjectURL(selectedFile));
-    }
-  };
-
-  const uploadImage = async (
-    file: File,
-  ): Promise<{ url: string; publicId: string }> => {
-    const data = new FormData();
-    data.append("image", file);
-
-    const res = await fetch(`${APP_URL}/api/admin/upload/image`, {
-      method: "POST",
-      body: data,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "فشل رفع الصورة");
-    const url = result.url || result.data?.url;
-    const publicId = result.publicId || result.data?.publicId;
-    return { url, publicId };
   };
 
   /* ---------------- submit ---------------- */
@@ -109,14 +76,8 @@ export default function ArticlesManager({
     setSuccess(null);
 
     try {
-      let finalCoverImageUrl = coverImageUrl;
-      let finalCoverImageId = coverImageId;
-
-      if (file) {
-        const uploaded = await uploadImage(file);
-        finalCoverImageUrl = uploaded.url;
-        finalCoverImageId = uploaded.publicId;
-      }
+      const finalCoverImageUrl = coverImageUrl;
+      const finalCoverImageId = coverImageId;
 
       const body = {
         title,
@@ -172,8 +133,6 @@ export default function ArticlesManager({
     setCoverImageId(article.coverImageId);
     setCategoryId(article.categoryId || "");
     setKeywords(article.keywords || []);
-    setPreview(article.coverImageUrl || "");
-    setFile(null);
     setError(null);
     setSuccess(null);
   };
@@ -255,30 +214,15 @@ export default function ArticlesManager({
           />
         </div>
         {/* Cover Image Upload */}
-        <div
-          className="border-2 border-dashed border-gray-300 rounded-lg p-3 flex flex-col items-center justify-center cursor-pointer hover:border-gray-500"
-          onClick={() => document.getElementById("coverInput")?.click()}>
-          {preview || coverImageUrl ? (
-            <Image
-              src={preview || (coverImageUrl as string)}
-              width={600}
-              height={400}
-              alt="معاينة صورة الغلاف"
-              className="max-h-32 object-contain"
-            />
-          ) : (
-            <p className="text-gray-500 text-xs">انقر لإضافة صورة الغلاف</p>
-          )}
-          <Input
-            id="coverInput"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFileChange}
-          />
-        </div>
+        <ImageUploader
+          token={token}
+          value={coverImageUrl}
+          onChange={(url) => setCoverImageUrl(url || null)}
+          label="صورة الغلاف (اختياري)"
+          placeholder="انقر أو اسحب لإضافة صورة الغلاف"
+        />
         {/* Content Editor */}
-        <ArticleEditor content={content} onChange={setContent} />
+        <ArticleEditor content={content} onChange={setContent} token={token} />
         <div className="flex gap-2">
           <button
             disabled={saving}
