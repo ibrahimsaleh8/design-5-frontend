@@ -9,6 +9,19 @@ export type Category = {
     articles: number;
   };
 };
+export type ArticleImage = {
+  id: string;
+  imageUrl: string;
+  alt: string;
+  articleId: string;
+};
+
+export type CustomSection = {
+  id: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type Article = {
   id: string;
@@ -26,6 +39,7 @@ export type Article = {
     title: string;
     slug: string;
   } | null;
+  images?: ArticleImage[];
 };
 
 export type HomepageCategory = {

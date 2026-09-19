@@ -150,7 +150,26 @@ export default async function ArticlePage({ params }: Props) {
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         )}
-
+        {/* Article Images Gallery */}
+        {article.images && article.images.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 mt-8 pt-8">
+            {article.images.map((img) => (
+              <div
+                key={img.id}
+                className="group block overflow-hidden rounded-xl border border-gray-100 bg-gray-50 shadow-sm hover:shadow-md transition-all hover:border-gray-200">
+                <div className="relative aspect-16/10 w-full overflow-hidden bg-gray-100">
+                  <Image
+                    src={img.imageUrl}
+                    alt={img.alt || ""}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="max-w-3xl mx-auto mb-4">
           <RelatedArticles articles={related} />
         </div>

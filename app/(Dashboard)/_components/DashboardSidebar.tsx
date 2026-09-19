@@ -8,7 +8,13 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Newspaper, Share2, Settings } from "lucide-react"; // Import icons
+import {
+  Home,
+  Newspaper,
+  Share2,
+  Settings,
+  LayoutTemplate,
+} from "lucide-react"; // Import icons
 
 // Menu items with icons
 const items = [
@@ -16,6 +22,11 @@ const items = [
   { title: "المقالات", url: "/dashboard/articles", icon: Newspaper },
   { title: "وسائل التواصل", url: "/dashboard/social-media", icon: Share2 },
   { title: "الإعدادات", url: "/dashboard/settings", icon: Settings },
+  {
+    title: "الأقسام المخصصة",
+    url: "/dashboard/custom-sections",
+    icon: LayoutTemplate,
+  },
 ];
 
 export function DashboardSidebar() {

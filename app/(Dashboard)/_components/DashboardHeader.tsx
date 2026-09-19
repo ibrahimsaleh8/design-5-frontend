@@ -6,6 +6,7 @@ import {
   Bot,
   Home,
   LayoutDashboard,
+  LayoutTemplate,
   Menu,
   Newspaper,
   Settings,
@@ -21,6 +22,11 @@ const navItems = [
   { title: "مقالات AI", url: "/dashboard/ai-articles", icon: Bot },
   { title: "وسائل التواصل", url: "/dashboard/social-media", icon: Share2 },
   { title: "الإعدادات", url: "/dashboard/settings", icon: Settings },
+  {
+    title: "الأقسام المخصصة",
+    url: "/dashboard/custom-sections",
+    icon: LayoutTemplate,
+  },
 ];
 
 export default function DashboardHeader() {

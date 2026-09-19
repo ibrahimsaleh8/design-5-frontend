@@ -7,6 +7,8 @@ import ArticleEditor from "./ArticleEditor";
 import { Category } from "@/lib/types";
 import KeywordTagManager from "@/app/(Dashboard)/_components/KeywordTagManager";
 import { Input } from "@/components/ui/input";
+import { ImagePlus } from "lucide-react";
+import ArticleImagesModal, { ArticleImage } from "./ArticleImagesModal";
 import ImageUploader from "@/components/ImageUploader";
 
 // Dashboard-specific article type with new API fields
@@ -24,6 +26,7 @@ export type DashboardArticle = {
     title: string;
     slug: string;
   } | null;
+  images?: ArticleImage[];
 };
 
 export default function ArticlesManager({
@@ -49,6 +52,14 @@ export default function ArticlesManager({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  /* images modal */
+  const [imagesModalArticle, setImagesModalArticle] =
+    useState<DashboardArticle | null>(null);
+
+  /* images for new article creation */
+  const [createImages, setCreateImages] = useState<ArticleImage[]>([]);
+  const [isCreateImagesModalOpen, setIsCreateImagesModalOpen] = useState(false);
+
   /* ---------------- helpers ---------------- */
 
   const resetForm = () => {
@@ -59,6 +70,7 @@ export default function ArticlesManager({
     setCoverImageId(null);
     setCategoryId("");
     setKeywords([]);
+    setCreateImages([]);
   };
 
   /* ---------------- submit ---------------- */
@@ -86,6 +98,14 @@ export default function ArticlesManager({
         ...(finalCoverImageId ? { coverImageId: finalCoverImageId } : {}),
         ...(categoryId ? { categoryId } : {}),
         ...(keywords.length > 0 ? { keywords } : {}),
+        ...(!editingId && createImages.length > 0
+          ? {
+              images: createImages.map((img) => ({
+                imageUrl: img.imageUrl,
+                ...(img.alt ? { alt: img.alt } : {}),
+              })),
+            }
+          : {}),
       };
 
       const url = editingId
@@ -221,6 +241,66 @@ export default function ArticlesManager({
           label="صورة الغلاف (اختياري)"
           placeholder="انقر أو اسحب لإضافة صورة الغلاف"
         />
+
+        {/* Additional Article Images (Create / Edit) */}
+        <div className="space-y-2 border border-dashed border-[#e8ddd4] bg-[#fdfaf7] rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-xs font-semibold text-[#6B4E2F] block">
+                صور المقال الإضافية (اختياري)
+              </label>
+              <p className="text-[11px] text-[#8B7D72]">
+                {editingId
+                  ? "يمكنك إدارة صور المقال عبر النافذة المنبثقة"
+                  : "أضف صوراً مخصصة مع النص البديل (alt) ليتم إرفاقها عند إنشاء المقال"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                if (editingId) {
+                  const currentArt = articles.find((a) => a.id === editingId);
+                  if (currentArt) setImagesModalArticle(currentArt);
+                } else {
+                  setIsCreateImagesModalOpen(true);
+                }
+              }}
+              className="text-xs bg-[#f0e8e0] text-[#6B4E2F] hover:bg-[#e4d7cc] px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5">
+              <ImagePlus className="w-4 h-4" />
+              {editingId
+                ? "إدارة الصور"
+                : createImages.length > 0
+                  ? `تعديل الصور (${createImages.length})`
+                  : "إضافة صور"}
+            </button>
+          </div>
+
+          {!editingId && createImages.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {createImages.map((img) => (
+                <div
+                  key={img.id}
+                  className="relative w-16 h-16 rounded-lg overflow-hidden border border-[#d4c4b5] group"
+                  title={img.alt || "صورة المقال"}>
+                  <Image
+                    src={img.imageUrl}
+                    alt={img.alt || "صورة"}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  {img.alt && (
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 px-1 py-0.5">
+                      <p className="text-[9px] text-white truncate text-right">
+                        {img.alt}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
         {/* Content Editor */}
         <ArticleEditor content={content} onChange={setContent} token={token} />
         <div className="flex gap-2">
@@ -294,6 +374,17 @@ export default function ArticlesManager({
 
                 <div className="flex items-center gap-2">
                   <button
+                    type="button"
+                    onClick={() => setImagesModalArticle(article)}
+                    className="text-xs md:text-sm px-3 py-1.5 rounded-md border border-[#d4c4b5] text-[#6B4E2F] hover:bg-[#f0e8e0] transition-colors">
+                    الصور
+                    {(article.images?.length ?? 0) > 0 && (
+                      <span className="mr-1 text-[10px] bg-[#f0e8e0] text-[#6B4E2F] px-1.5 py-0.5 rounded-full font-medium">
+                        {article.images!.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
                     onClick={() => handleEditClick(article)}
                     className="text-xs md:text-sm px-3 py-1.5 rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50">
                     تعديل
@@ -309,6 +400,38 @@ export default function ArticlesManager({
           </div>
         )}
       </div>
+
+      {/* Article Images Modal (Existing Article) */}
+      {imagesModalArticle && (
+        <ArticleImagesModal
+          open={!!imagesModalArticle}
+          onClose={() => setImagesModalArticle(null)}
+          articleId={imagesModalArticle.id}
+          token={token}
+          initialImages={imagesModalArticle.images ?? []}
+          onImagesChange={(imgs) => {
+            setImagesModalArticle((prev) =>
+              prev ? { ...prev, images: imgs } : null,
+            );
+            setArticles((prev) =>
+              prev.map((a) =>
+                a.id === imagesModalArticle.id ? { ...a, images: imgs } : a,
+              ),
+            );
+          }}
+        />
+      )}
+
+      {/* Article Images Modal (New Article Creation) */}
+      {isCreateImagesModalOpen && (
+        <ArticleImagesModal
+          open={isCreateImagesModalOpen}
+          onClose={() => setIsCreateImagesModalOpen(false)}
+          token={token}
+          initialImages={createImages}
+          onImagesChange={setCreateImages}
+        />
+      )}
     </div>
   );
 }
