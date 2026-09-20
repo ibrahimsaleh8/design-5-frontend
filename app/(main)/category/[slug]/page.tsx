@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return { title: "القسم غير موجود" };
 
   return {
-    title: `${data.category.title} | المقالات`,
+    title: `${data.category.title}`,
     description: `تصفح جميع مقالات قسم ${data.category.title}`,
     alternates: {
       canonical: `${currentURL}/category/${data.category.slug}`,
