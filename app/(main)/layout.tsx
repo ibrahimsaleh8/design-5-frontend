@@ -63,7 +63,7 @@ export default async function Layout({
   const { settings, socials, categories } = await getLayoutData();
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen overflow-x-hidden">
       <Header settings={settings} categories={categories} />
       <main className="flex-1 overflow-x-hidden">{children}</main>
       <FloatedIcons

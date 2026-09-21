@@ -33,8 +33,8 @@ export default function Logo({ settings, size = "md" }: Props) {
         </span>
       )}
       <span
-        className={`font-bold text-[var(--text-heading)] group-hover:text-[var(--primary)] transition-colors ${
-          isSmall ? "text-base" : "text-lg"
+        className={`font-bold text-[var(--text-heading)] group-hover:text-[var(--primary)] transition-colors md:max-w-80 max-w-40 ${
+          isSmall ? "sm:text-base text-xs" : "text-lg"
         }`}>
         {settings.projectName}
       </span>

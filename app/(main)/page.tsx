@@ -22,10 +22,10 @@ async function getHomeData() {
       customSectionsRes,
     ] = await Promise.all([
       fetch(`${APP_URL}/api/settings`, { cache: "force-cache" }),
-      fetch(`${APP_URL}/api/articles/homepage?limit=6`, {
+      fetch(`${APP_URL}/api/articles/homepage?limit=16`, {
         cache: "force-cache",
       }),
-      fetch(`${APP_URL}/api/articles?limit=10&sort=createdAt:desc`, {
+      fetch(`${APP_URL}/api/articles?limit=16&sort=createdAt:desc`, {
         cache: "force-cache",
       }),
       fetch(`${APP_URL}/api/categories`, { cache: "force-cache" }),
@@ -110,10 +110,7 @@ function getGridArticles(
 export default async function HomePage() {
   const { homepageCategories, articles, categories, customSections } =
     await getHomeData();
-
   const featured = getFeaturedArticle(homepageCategories, articles);
-  const gridArticles = getGridArticles(featured, homepageCategories, articles);
-  const trendingArticles = articles.slice(0, 4);
 
   return (
     <>
@@ -124,11 +121,11 @@ export default async function HomePage() {
           <div className="flex-1 min-w-0 flex flex-col gap-6">
             <CategoryPills categories={categories} />
 
-            <ArticleGrid articles={gridArticles.slice(0, 9)} />
+            <ArticleGrid articles={articles.slice(0, 9)} />
           </div>
 
           <div className="lg:w-72 xl:w-80 shrink-0">
-            <TrendingList articles={trendingArticles} />
+            <TrendingList articles={articles.slice(9)} />
           </div>
         </div>
       </section>
