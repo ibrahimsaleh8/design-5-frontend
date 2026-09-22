@@ -7,7 +7,14 @@ import ArticleEditor from "./ArticleEditor";
 import { Category } from "@/lib/types";
 import KeywordTagManager from "@/app/(Dashboard)/_components/KeywordTagManager";
 import { Input } from "@/components/ui/input";
-import { ImagePlus } from "lucide-react";
+import {
+  CheckCircle2,
+  ImagePlus,
+  Loader2,
+  Plus,
+  Sparkles,
+  X,
+} from "lucide-react";
 import ArticleImagesModal, { ArticleImage } from "./ArticleImagesModal";
 import ImageUploader from "@/components/ImageUploader";
 
@@ -47,6 +54,11 @@ export default function ArticlesManager({
   const [coverImageId, setCoverImageId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
+  /* AI keyword generation */
+  const [seedKeyword, setSeedKeyword] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[] | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +83,74 @@ export default function ArticlesManager({
     setCategoryId("");
     setKeywords([]);
     setCreateImages([]);
+  };
+  /* ---------------- AI keyword generation ---------------- */
+
+  const handleGenerateKeywords = async () => {
+    const trimmedTitle = title.trim();
+    // Strip HTML tags from content to get plain text length check
+    const plainContent = content.replace(/<[^>]*>/g, "").trim();
+
+    if (!trimmedTitle) {
+      setAiError("يجب إدخال عنوان المقال أولاً قبل توليد الكلمات المفتاحية.");
+      return;
+    }
+    if (!plainContent) {
+      setAiError("يجب إدخال محتوى المقال أولاً قبل توليد الكلمات المفتاحية.");
+      return;
+    }
+
+    setGenerating(true);
+    setAiError(null);
+    setAiSuggestions(null);
+
+    try {
+      const payload: { title: string; content: string; keyword?: string } = {
+        title: trimmedTitle,
+        content,
+      };
+      const trimmedSeed = seedKeyword.trim();
+      if (trimmedSeed) payload.keyword = trimmedSeed;
+
+      const res = await fetch(`${APP_URL}/api/v1/seo/article-keywords`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok)
+        throw new Error(json.message || "فشل توليد الكلمات المفتاحية");
+
+      const list: string[] = Array.isArray(json.data?.keywords)
+        ? json.data.keywords
+        : [];
+      if (list.length === 0) {
+        setAiError("لم يتم إنتاج أي كلمات مفتاحية. حاول مجدداً.");
+        return;
+      }
+      setAiSuggestions(list);
+    } catch (err: unknown) {
+      setAiError(
+        err instanceof Error ? err.message : "حدث خطأ أثناء الاتصال بالخادم",
+      );
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleAddAllAiKeywords = () => {
+    if (!aiSuggestions) return;
+    const merged = Array.from(new Set([...keywords, ...aiSuggestions]));
+    setKeywords(merged);
+    setAiSuggestions(null);
+  };
+
+  const handleAddSingleAiKeyword = (kw: string) => {
+    if (!keywords.includes(kw)) {
+      setKeywords((prev) => [...prev, kw]);
+    }
+    setAiSuggestions((prev) => prev?.filter((k) => k !== kw) ?? null);
   };
 
   /* ---------------- submit ---------------- */
@@ -232,6 +312,163 @@ export default function ArticlesManager({
             onChange={setKeywords}
             showFooterActions={false}
           />
+          {/* AI Keyword Generator for Article */}
+          <div
+            className="bg-linear-to-r from-purple-50/80 via-indigo-50/50 to-purple-50/80 border border-purple-200/90 rounded-2xl p-4 space-y-3"
+            dir="rtl">
+            {/* Header */}
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-purple-600 text-white">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">
+                  توليد كلمات مفتاحية بالذكاء الاصطناعي
+                </h4>
+                <p className="text-[11px] text-gray-500">
+                  يستخدم عنوان ومحتوى المقال لتوليد كلمات SEO عربية مناسبة
+                </p>
+              </div>
+            </div>
+
+            {/* Input + Button */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="relative flex-1">
+                <Input
+                  type="text"
+                  placeholder="كلمة مفتاحية بذرية (اختياري) مثل: عناية بالبشرة..."
+                  value={seedKeyword}
+                  onChange={(e) => setSeedKeyword(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleGenerateKeywords();
+                    }
+                  }}
+                  disabled={generating}
+                  className="bg-white border-purple-200 text-xs sm:text-sm pr-3 text-right placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-purple-400 h-10"
+                  dir="rtl"
+                />
+                {seedKeyword && (
+                  <button
+                    type="button"
+                    onClick={() => setSeedKeyword("")}
+                    disabled={generating}
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-full transition-colors"
+                    title="مسح">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGenerateKeywords}
+                disabled={
+                  generating ||
+                  !title.trim() ||
+                  !content.replace(/<[^>]*>/g, "").trim()
+                }
+                title={
+                  !title.trim()
+                    ? "أدخل عنوان المقال أولاً"
+                    : !content.replace(/<[^>]*>/g, "").trim()
+                      ? "أدخل محتوى المقال أولاً"
+                      : "توليد الكلمات المفتاحية"
+                }
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                style={{
+                  background: generating
+                    ? "#94a3b8"
+                    : "linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)",
+                }}>
+                {generating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>جاري التوليد...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4" />
+                    <span>توليد الكلمات</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Error */}
+            {aiError && !generating && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start justify-between gap-3 text-right">
+                <p className="text-xs text-red-700 leading-relaxed font-medium">
+                  {aiError}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setAiError(null)}
+                  className="text-red-400 hover:text-red-700 p-0.5 rounded transition-colors shrink-0"
+                  title="إغلاق">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Suggestions Panel */}
+            {aiSuggestions !== null && (
+              <div className="border border-purple-200 bg-white rounded-xl p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-purple-900">
+                      الكلمات المقترحة
+                    </span>
+                    <span className="text-[11px] font-semibold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                      {aiSuggestions.length} كلمة
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAiSuggestions(null)}
+                    className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+                    إغلاق
+                  </button>
+                </div>
+
+                {/* Keyword chips */}
+                <div className="flex flex-wrap gap-2 max-h-52 overflow-y-auto">
+                  {aiSuggestions.map((kw) => (
+                    <span
+                      key={kw}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 border border-purple-200 rounded-lg text-xs text-purple-950 font-medium hover:border-purple-400 transition-all">
+                      <span>{kw}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleAddSingleAiKeyword(kw)}
+                        className="text-emerald-600 hover:text-emerald-800 transition-colors"
+                        title="إضافة">
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+
+                {/* Add all */}
+                {aiSuggestions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleAddAllAiKeywords}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white shadow-xs transition-all w-full justify-center"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                    }}>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>
+                      إضافة جميع الكلمات المقترحة ({aiSuggestions.length})
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         {/* Cover Image Upload */}
         <ImageUploader

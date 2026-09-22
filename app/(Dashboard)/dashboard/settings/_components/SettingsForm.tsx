@@ -22,6 +22,7 @@ import {
   X,
   Loader2,
 } from "lucide-react";
+import AiKeywordGenerator from "@/app/(Dashboard)/_components/AiKeywordGenerator";
 
 interface SettingsFormProps {
   initialData: SiteSettings | null;
@@ -439,116 +440,11 @@ export default function SettingsForm({
 
           {/* AI Keyword Generator Button */}
           <div className="pt-2 space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="block text-sm font-semibold text-gray-700">
-                الكلمات المفتاحية (Meta Keywords)
-              </label>
-
-              <button
-                type="button"
-                onClick={handleGenerateKeywords}
-                disabled={generating || isLoading}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-all duration-200 shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  background: generating
-                    ? "#a0a8b4"
-                    : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                }}>
-                {generating ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    جاري التوليد...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    توليد كلمات مفتاحية بالذكاء الاصطناعي
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Generation Error */}
-            {genError && !generating && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start justify-between gap-3">
-                <p className="text-xs text-red-600">{genError}</p>
-                <button
-                  type="button"
-                  onClick={() => setGenError(null)}
-                  className="text-red-400 hover:text-red-600 text-xs font-bold shrink-0">
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-
-            {/* AI Suggestions Panel */}
-            {suggestions !== null && (
-              <div className="border border-purple-200 bg-purple-50 rounded-xl p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-purple-600" />
-                    <h4 className="text-xs font-bold text-purple-800">
-                      الكلمات المفتاحية المقترحة
-                    </h4>
-                    <span className="text-[11px] text-purple-600 bg-purple-100 rounded-full px-2 py-0.5">
-                      {suggestions.length} كلمة
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCancelSuggestions}
-                    className="text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
-                    إلغاء العملية
-                  </button>
-                </div>
-
-                {suggestions.length === 0 ? (
-                  <p className="text-xs text-purple-400 text-center py-3">
-                    تمت إزالة جميع الاقتراحات
-                  </p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {suggestions.map((kw, index) => (
-                      <span
-                        key={`setting-suggestion-${index}`}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-purple-200 rounded-md text-xs text-purple-800 font-medium hover:bg-purple-50 transition-colors">
-                        <span>{kw}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSuggestion(index)}
-                          className="text-purple-400 hover:text-red-500 font-bold text-xs px-0.5 leading-none transition-colors cursor-pointer"
-                          title="حذف الاقتراح">
-                          ✕
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={handleAddSuggestions}
-                    disabled={suggestions.length === 0}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{
-                      background:
-                        suggestions.length === 0
-                          ? "#a0a8b4"
-                          : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                    }}>
-                    <Plus className="w-3.5 h-3.5" />
-                    إضافة إلى الكلمات المفتاحية
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCancelSuggestions}
-                    className="text-xs text-gray-400 hover:text-gray-600 font-medium transition-colors cursor-pointer">
-                    إلغاء
-                  </button>
-                </div>
-              </div>
-            )}
+            <AiKeywordGenerator
+              existingKeywords={keywordsList}
+              onAddKeywords={handleKeywordsChange}
+              disabled={isLoading}
+            />
 
             {/* Meta Keywords - Using exact visual tag component */}
             <KeywordTagManager
