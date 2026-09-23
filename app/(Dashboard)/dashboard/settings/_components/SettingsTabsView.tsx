@@ -23,7 +23,7 @@ export default function SettingsTabsView({
     <div className="space-y-6">
       {/* Modern Pill Tabs */}
       <div
-        className="flex items-center gap-2 border-b border-gray-200 pb-3"
+        className="flex flex-col sm:flex-row items-center gap-2 border-b border-gray-200 pb-3"
         dir="rtl">
         <button
           type="button"
