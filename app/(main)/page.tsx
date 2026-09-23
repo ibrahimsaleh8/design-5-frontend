@@ -3,12 +3,15 @@ import CategoryPills from "@/components/editorial/CategoryPills";
 import HeroFeatured from "@/components/editorial/HeroFeatured";
 import NewsletterBlock from "@/components/editorial/NewsletterBlock";
 import TrendingList from "@/components/editorial/TrendingList";
+import HomeLocationSection from "@/components/editorial/HomeLocationSection";
 import { APP_URL } from "@/lib/ProjectId";
 import {
+  ApiResponse,
   Article,
   Category,
   CustomSection,
   HomepageCategory,
+  LocationData,
   SiteSettings,
 } from "@/lib/types";
 
@@ -20,6 +23,7 @@ async function getHomeData() {
       latestRes,
       categoriesRes,
       customSectionsRes,
+      locationRes,
     ] = await Promise.all([
       fetch(`${APP_URL}/api/settings`, { cache: "force-cache" }),
       fetch(`${APP_URL}/api/articles/homepage?limit=16`, {
@@ -30,6 +34,7 @@ async function getHomeData() {
       }),
       fetch(`${APP_URL}/api/categories`, { cache: "force-cache" }),
       fetch(`${APP_URL}/api/custom-sections`),
+      fetch(`${APP_URL}/api/location`, { next: { revalidate: 60 } }),
     ]);
 
     const settings: SiteSettings | null = settingsRes.ok
@@ -58,6 +63,20 @@ async function getHomeData() {
       : Array.isArray(customSectionsJson)
         ? customSectionsJson
         : [];
+
+    let location: LocationData | null = null;
+    if (locationRes && locationRes.ok) {
+      try {
+        const locationJson: ApiResponse<LocationData> =
+          await locationRes.json();
+        if (locationJson.success && locationJson.data) {
+          location = locationJson.data;
+        }
+      } catch (err) {
+        console.error("Failed to parse location data:", err);
+      }
+    }
+
     const articles = fetchedLatest.length > 0 ? fetchedLatest : [];
 
     return {
@@ -66,6 +85,7 @@ async function getHomeData() {
       articles,
       categories,
       customSections,
+      location,
     };
   } catch {
     return {
@@ -73,6 +93,8 @@ async function getHomeData() {
       homepageCategories: [],
       articles: [],
       categories: [],
+      customSections: [],
+      location: null,
     };
   }
 }
@@ -108,7 +130,7 @@ function getGridArticles(
 }
 
 export default async function HomePage() {
-  const { homepageCategories, articles, categories, customSections } =
+  const { homepageCategories, articles, categories, customSections, location } =
     await getHomeData();
   const featured = getFeaturedArticle(homepageCategories, articles);
 
@@ -142,6 +164,9 @@ export default async function HomePage() {
           ))}
         </div>
       )}
+
+      {/* Interactive Location Search and Map Section */}
+      <HomeLocationSection initialLocation={location} />
     </>
   );
 }
