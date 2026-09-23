@@ -41,6 +41,30 @@ export type Article = {
   } | null;
   images?: ArticleImage[];
 };
+export type LocationData = {
+  id?: number;
+  name: string;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type PlaceSelectedData = {
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type PlaceSearchResult = {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+};
 
 export type HomepageCategory = {
   id: string;
